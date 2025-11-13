@@ -17,6 +17,7 @@ type CreateData = z.infer<typeof createSchema>;
 export default function Todos() {
   const queryClient = useQueryClient();
   const logout = useAuthStore((s) => s.logout);
+  const token = useAuthStore((s) => s.token);
   const navigate = useNavigate();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState<string>('');
@@ -27,6 +28,7 @@ export default function Todos() {
   const { data: todos = [], isLoading } = useQuery({
     queryKey: ['todos'],
     queryFn: api.listTodos,
+    enabled: !!token,
   });
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateData>({ resolver: zodResolver(createSchema) });
