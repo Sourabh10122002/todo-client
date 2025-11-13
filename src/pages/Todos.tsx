@@ -25,7 +25,7 @@ export default function Todos() {
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
   const [search, setSearch] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const { data: todos = [], isLoading } = useQuery({
+  const { data: todos = [], isLoading, isError, error } = useQuery({
     queryKey: ['todos'],
     queryFn: api.listTodos,
     enabled: !!token,
@@ -152,7 +152,11 @@ export default function Todos() {
       </section>
 
       <section className="mt-6">
-        {isLoading ? (
+        {isError ? (
+          <div className="card p-6 text-center text-red-600">
+            Failed to load todos{error instanceof Error ? `: ${error.message}` : ''}
+          </div>
+        ) : isLoading ? (
           <div className="card p-6 grid place-items-center text-gray-500">Loading...</div>
         ) : filtered.length === 0 ? (
           <div className="card p-6 text-center text-gray-600">No todos yet</div>
