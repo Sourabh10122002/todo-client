@@ -35,16 +35,31 @@ export const AuthResponseSchema = z.object({
   user: AuthUserSchema,
 });
 
-export const TodoSchema = z.object({
-  id: z.string(),
+// Accept either `id` or `_id`, and coerce any value to a string
+const ServerTodoSchema = z.object({
+  id: z.any().optional(),
+  _id: z.any().optional(),
   title: z.string(),
   description: z.string().optional().default(''),
   completed: z.boolean(),
-  createdAt: z.string().or(z.date()).transform((v) => (typeof v === 'string' ? v : v.toISOString())),
-});
+  createdAt: z.string().or(z.date()),
+}).transform((raw) => ({
+  id:
+    typeof raw.id === 'string' ? raw.id :
+    typeof raw._id === 'string' ? raw._id :
+    raw.id != null ? String(raw.id) :
+    raw._id != null ? String(raw._id) :
+    '',
+  title: raw.title,
+  description: raw.description ?? '',
+  completed: raw.completed,
+  createdAt: typeof raw.createdAt === 'string' ? raw.createdAt : raw.createdAt.toISOString(),
+}));
+
+export const TodoSchema = ServerTodoSchema; // normalized shape with `id: string`
 
 export const TodosResponseSchema = z.object({
-  todos: z.array(TodoSchema),
+  todos: z.array(ServerTodoSchema),
 });
 
 export type AuthUser = z.infer<typeof AuthUserSchema>;
